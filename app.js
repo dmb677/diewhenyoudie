@@ -21,7 +21,7 @@ const sessionVar = session({
     secret: process.env.sessionSecret,
     resave: true,
     saveUninitialized: true,
-    cookie:{
+    cookie: {
         sameSite: true,
     }
 });
@@ -45,6 +45,16 @@ app.use(sessionVar);
 app.use(logRoutes);
 app.use(express.static(httpdocs));
 app.use('/auth', authRoutes);
+
+app.get('/', (req, res) => {
+    res.render('index');
+});
+
+app.get('/b', (req, res) => {
+    res.render('btemplate', {
+        blogtitle: 'BLOGtitle'
+    });
+});
 
 //API functions
 app.all('/api/:id', (req, res) => {
