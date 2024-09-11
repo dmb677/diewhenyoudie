@@ -50,9 +50,26 @@ app.get('/', (req, res) => {
     res.render('index');
 });
 
-app.get('/b', (req, res) => {
-    res.render('btemplate', {
+app.get('/b/tag/:id', (req, res, next) => {
+    // see if file exits fs.statSync()
+    if (true) {
+        next();
+    } else {
+        res.render('btemplate', {
+            blogtitle: 'BLOGtitle'
+        });
+    }
+});
+
+app.get('/b/home', (req, res) => {
+    res.render('bhome', {
         blogtitle: 'BLOGtitle'
+    });
+});
+
+app.get('/b/edit', (req, res) => {
+    res.render('bedit', {
+        blogtitle: 'Editing'
     });
 });
 
