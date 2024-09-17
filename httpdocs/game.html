@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
         canvas {
-            border: 1px solid #d61414;
+            border: 10px solid #d61414;
             background-color: #f5f1f1;
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: -1;
         }
     </style>
 </head>
@@ -34,27 +38,63 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
-    <div class="container">
-        <h1 class="mt-5"> Game of Death</h1>
-        <div class="form-group">
-            <span id="userNameForm">
-                <input type="user" class="form-control" id="exampleInputEmail1" aria-describedby="emailHelp"
-                    placeholder="Enter User Name and Press Play">
-            </span>
-        </div>
-        <br>
-        <button type="submit" class="btn btn-primary mb-5" id="#submitButton">Play</button>
-
-        <div class="row text-center" id="touchscreen">
-            <div id="myCanvas"></div>
+    <div class="container mt-5">
+        <div class="row align-middle">
+            <div id="liveAlertPlaceholder"></div>
         </div>
     </div>
+
+    <div id="myCanvas"></div>
+
 
 </body>
 
 <script src="/dist/js/game.js"></script>
 
 <script>
+    const appendAlert = (message, type) => {
+        const wrapper = document.createElement('div')
+        wrapper.innerHTML = [
+            `<div class="alert alert-${type}">`,
+            `   <div>${message}</div>`,
+            '</div>'
+        ].join('')
+        $("#liveAlertPlaceholder").append(wrapper);
+    }
+
+
+    introMessage = [
+        `<h1 class='mt-5'> Game of Death</h1>`,
+        `<input type="user" class="form-control" id="gamername"`,
+        `placeholder="Enter User Name and Press Play">`,
+        `<button type="submit" class="btn btn-primary my-5" id="submitButton">Play</button>`,
+    ].join('');
+
+    appendAlert(introMessage, 'warning');
+    $("#submitButton").click(checkUser);
+
+    function checkUser() {
+        val = $("#gamername").val();
+        if (gamePlayer == null) {
+            if (!val) {
+                alert("Please Enter a User Name");
+            } else {
+                $.get("/game/sign/" + val, function() {
+                    gamePlayer = val;
+                    myGameArea.start();
+                    $("#liveAlertPlaceholder").html("");
+                });
+            }
+        } else {
+            controls = true;
+            startGame();
+            myGameArea.start();
+        }
+    };
+
+
+
+
     document.addEventListener('keydown', (event) => {
         switch (event.key) {
             case 'ArrowUp':
@@ -138,34 +178,32 @@
     }
 
     var el = document.getElementById('touchscreen');
-    swipedetect(el, function(swipedir){
+    swipedetect(el, function(swipedir) {
         console.log("here")
         switch (swipedir) {
-           
+
             case 'right':
                 moveright();
-                
+
                 break;
             case 'left':
                 moveleft();
-           
+
                 break;
         }
     })
 
 
     el.addEventListener('touchstart', function(e) {
-            moveup();
-            e.preventDefault()
-        }, false)
+        moveup();
+        e.preventDefault()
+    }, false)
 
 
-        el.addEventListener('touchend', function(e) {
-            clearThrust()
-            e.preventDefault()
-        }, false)
-
-
+    el.addEventListener('touchend', function(e) {
+        clearThrust()
+        e.preventDefault()
+    }, false)
 </script>
 
 

@@ -7,8 +7,9 @@ var gamePlayer = null;
 var myGameArea = {
     canvas: document.createElement("canvas"),
     create: function () {
-        this.canvas.width = window.innerWidth * 0.8;
-        this.canvas.height = 500;
+        this.canvas.width = window.innerWidth - 20;
+        this.canvas.height = window.innerHeight - 20;
+        console.log(window.innerWidth)
         this.context = this.canvas.getContext("2d");
         $("#myCanvas").append(this.canvas);
         this.frameNo = 0;
@@ -79,24 +80,6 @@ function startGame() {
     myGameArea.create();
 }
 
-$("button").click(function () {
-    val = $("#exampleInputEmail1").val();
-    if (gamePlayer == null) {
-        if (!val) {
-            alert("Please Enter a User Name");
-        } else {
-            $.get("/game/sign/" + val, function () {
-                $("#userNameForm").html("Playing as " + val);
-                gamePlayer = val;
-                myGameArea.start();
-            });
-        }
-    } else {
-        controls = true;
-        startGame();
-        myGameArea.start();
-    }
-});
 
 
 
@@ -304,8 +287,10 @@ function gameEndAnimation() {
     gameOver.update();
     bestPlace.update();
     worstPlace.update();
-    if (myGameArea.gameFrameNo > 400) {
+    if (myGameArea.gameFrameNo > 200) {
         clearInterval(myGameArea.gameOverAnimation);
+        appendAlert(introMessage, 'warning');
+        $("#submitButton").click(checkUser);
     }
 
 }
