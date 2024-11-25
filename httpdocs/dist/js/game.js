@@ -1,20 +1,24 @@
 var myGamePiece;
 var myScore;
 var myObstacles = [];
-var controls = true;
 var gamePlayer = null;
+var playerName;
+
 
 var myGameArea = {
     canvas: document.createElement("canvas"),
-    create: function () {
-        this.canvas.width = window.innerWidth - 20;
-        this.canvas.height = window.innerHeight - 20;
-        console.log(window.innerWidth)
+    create: function (height, width) {
+        //this.canvas.width = width;
+        //this.canvas.height = height;
         this.context = this.canvas.getContext("2d");
         $("#myCanvas").append(this.canvas);
-        this.frameNo = 0;
     },
     start: function () {
+        if (this.interval) {
+            this.stop();
+        }
+        this.controls = true;
+        this.frameNo = 0;
         this.interval = setInterval(updateGameArea, 20);
     },
     clear: function () {
@@ -24,12 +28,7 @@ var myGameArea = {
         clearInterval(this.interval);
     },
     startEndAnimation: function () {
-        controls = false;
-        myGamePiece.rotate = 180;
-        myGamePiece.image.src = "/dist/img/isaacDead.png";
-        myGamePiece.gravitySpeed = -1;
-        myGamePiece.speedX = 0;
-        myGamePiece.sink = true;
+        this.controls = false;
         var finalScore = myGameArea.frameNo;
         $.get("/game/score/" + finalScore, function (data) {
             var dobj = JSON.parse(data);
@@ -77,12 +76,9 @@ var myGameArea = {
 function startGame() {
     myGamePiece = new component(80, 80, "/dist/img/isaacHead.png", 50, 50, "image");
     myScore = new component("30px", "Consolas", "black", 280, 40, "text");
-    myGameArea.create();
+    myGameArea.create(500, 1000);
+    playerName = new component("30px", "Consolas", "black", 10, 40, "text");
 }
-
-
-
-
 
 function component(width, height, color, x, y, type) {
     this.type = type;
@@ -96,7 +92,6 @@ function component(width, height, color, x, y, type) {
     this.speedY = 0;
     this.x = x;
     this.y = y;
-    this.count = 0;
     this.rotate = 0;
     this.gravity = 0.05;
     this.gravitySpeed = 0;
@@ -124,28 +119,13 @@ function component(width, height, color, x, y, type) {
 
     };
     this.newPos = function () {
-
         this.gravitySpeed += this.gravity;
         this.gravitySpeed = (this.gravitySpeed > 10) ? 10 : this.gravitySpeed;
         this.gravitySpeed = (this.gravitySpeed < -10) ? -10 : this.gravitySpeed;
         this.x += this.speedX;
         this.y += this.speedY + this.gravitySpeed;
         this.hit();
-
     };
-
-    this.breathIn = function () {
-        this.count++;
-
-        if (this.count % 100 >= 50) {
-            this.height += 0.1;
-            this.width += 0.1;
-        } else {
-            this.height -= 0.1;
-            this.width -= 0.1;
-        }
-    };
-
     this.hit = function () {
         var rockbottom = myGameArea.canvas.height - this.height / 2;
         if ((this.y > rockbottom) && !this.sink) {
@@ -171,7 +151,6 @@ function component(width, height, color, x, y, type) {
             this.rotate += 10;
         }
     };
-
     this.crashWith = function (otherobj) {
         var myleft = this.x - (this.width / 2);
         var myright = this.x + (this.width / 2);
@@ -187,9 +166,14 @@ function component(width, height, color, x, y, type) {
         }
         return crash;
     };
-
-
-
+    this.kill = function () {
+        this.rotate = 180;
+        myGamePiece.image.src = "/dist/img/isaacDead.png";
+        myGamePiece.gravitySpeed = -1;
+        myGamePiece.gravity = 0.05;
+        myGamePiece.speedX = 0;
+        myGamePiece.sink = true;
+    };
 }
 
 function updateGameArea() {
@@ -197,11 +181,13 @@ function updateGameArea() {
     myGameArea.clear();
     for (i = 0; i < myObstacles.length; i += 1) {
         if (myGamePiece.crashWith(myObstacles[i])) {
+            myGamePiece.kill();
             myGameArea.stop();
             myGameArea.startEndAnimation();
         }
     }
-    myGameArea.frameNo += 1;
+    myGameArea.frameNo++;
+
     if (myGameArea.frameNo == 1 || everyinterval(500)) {
         x = myGameArea.canvas.width;
         minHeight = 20;
@@ -218,13 +204,18 @@ function updateGameArea() {
         myObstacles[i].x += -1;
         myObstacles[i].update();
     }
-
-    myGamePiece.breathIn();
     myGamePiece.newPos();
-
     myScore.text = "SCORE: " + myGameArea.frameNo;
     myScore.update();
     myGamePiece.update();
+    playerName.update();
+
+    $.get('/game/getGameUser', function (data) {
+        //console.log(data);
+        playerName.text = data;
+        
+
+    });
 
 }
 
@@ -237,31 +228,26 @@ function everyinterval(n) {
 }
 
 function moveup() {
-    if (controls) {
+    if (myGameArea.controls) {
         myGamePiece.gravity = -0.2;
         myGamePiece.image.src = "/dist/img/isaacBlink.png";
     }
-
-}
-
-function movedown() {
-    //myGamePiece.speedY += 1;
 }
 
 function moveleft() {
-    if (controls) {
+    if (myGameArea.controls) {
         myGamePiece.speedX += -1;
     }
 }
 
 function moveright() {
-    if (controls) {
+    if (myGameArea.controls) {
         myGamePiece.speedX += 1;
     }
 }
 
 function clearThrust() {
-    if (controls) {
+    if (myGameArea.controls) {
         myGamePiece.gravity = 0.05;
         myGamePiece.image.src = "/dist/img/isaacHead.png";
     }

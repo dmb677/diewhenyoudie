@@ -55,6 +55,10 @@ app.get('/game/sign/:user', (req, res) => {
     res.end();
 });
 
+app.get('/game/getGameUser', (req,res) =>{
+    res.send(req.session.gameUser);
+})
+
 app.get('/game/score/:finalScore', (req, res) => {
     const date = new Date();
     var newScore;

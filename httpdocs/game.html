@@ -4,14 +4,32 @@
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <style>
+        #liveAlertPlaceholder {
+            position: absolute;
+            justify-content: center;
+            text-align: center;
+            align-items: center;
+            height: 430px;
+            width: 680px;  
+            font-size: 20px;
+            top: 80px;
+            left: 10px
+        }
+
         canvas {
             border: 10px solid #d61414;
             background-color: #f5f1f1;
-            position: absolute;
-            top: 0;
-            left: 0;
             z-index: -1;
+            height: 450px;
+            width: 700px;
         }
+
+        .holder {
+            position: relative;
+        }
+
+      
+
     </style>
 </head>
 
@@ -38,13 +56,15 @@
         crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
 
-    <div class="container mt-5">
-        <div class="row align-middle">
-            <div id="liveAlertPlaceholder"></div>
-        </div>
+    <div class="container holder">
+
+        <div id="liveAlertPlaceholder"></div>
+        <div id="myCanvas"></div>
+        
+
     </div>
 
-    <div id="myCanvas"></div>
+
 
 
 </body>
@@ -81,7 +101,7 @@
             } else {
                 $.get("/game/sign/" + val, function() {
                     gamePlayer = val;
-                    el.requestFullscreen();
+                    //el.requestFullscreen();
                     myGameArea.start();
                     $("#liveAlertPlaceholder").html("");
                 });
@@ -126,9 +146,9 @@
     });
 
 
-    
+
     var el = document.getElementById('myCanvas');
-  
+
 
 
     el.addEventListener('touchstart', function(e) {
@@ -141,10 +161,6 @@
         clearThrust()
         e.preventDefault()
     }, false)
-
-  
-    
-
 </script>
 
 
