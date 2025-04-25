@@ -6,10 +6,6 @@ const {
 const fs = require('fs');
 const app = express();
 
-
-const JSONdb = require('simple-json-db');
-const gamerDB = new JSONdb(process.env.gameDB);
-
 //create session var
 const session = require('express-session');
 const FileStore = require('session-file-store')(session);
@@ -32,6 +28,7 @@ const sessionVar = session({
 //routes
 const authRoutes = require('./routes/auth')(process.env.userDB);
 const logRoutes = require('./routes/log')(process.env.LogIPDB, process.env.logfile, process.env.userDB);
+const gameRoutes = require('./routes/game-routes')(process.env.gameDB);
 
 
 const port = process.env.port;
@@ -48,8 +45,8 @@ app.use(sessionVar);
 app.use(logRoutes);
 app.use(express.static(httpdocs));
 app.use('/auth', authRoutes);
+app.use('/game', gameRoutes);
 
-<<<<<<< HEAD
 app.get('/', (req, res) => {
     res.render('index');
 });
@@ -75,67 +72,13 @@ app.get('/b/edit', (req, res) => {
     res.render('bedit', {
         blogtitle: 'Editing'
     });
-=======
-
-app.get('/game/sign/:user', (req, res) => {
-    req.session.gameUser = req.params.user;
-    res.end();
 });
 
-app.get('/game/getGameUser', (req,res) =>{
-    res.send(req.session.gameUser);
-})
 
-app.get('/game/score/:finalScore', (req, res) => {
-    const date = new Date();
-    var newScore;
+//need to put in game routese
 
-    if (gamerDB.has(req.params.finalScore)) {
-        newScore = (gamerDB.get(req.params.finalScore));
-    } else {
-        newScore = [];
-    }
-    newScore.push({
-        "date": date,
-        "user": req.session.gameUser
-    });
-    gamerDB.set(req.params.finalScore, newScore);
 
-    var fullData = gamerDB.JSON();
-    var keys = Object.keys(fullData);
-    for (i = 0; i < keys.length; i++) {
-        if (keys[i] == req.params.finalScore) {
-
-            break;
-        }
-    }
-
-    //need to check if there are more than one person better/worse
-    //need to check if nobody is better or worse
-
-    if (i == (keys.length - 1)) {
-        ret = {
-            "place": (keys.length - i),
-        };
-    } else {
-        var ret = {
-            "place": (keys.length - i),
-            "better": {
-                "time": keys[i - 1],
-                "user": fullData[keys[i - 1]][0].user,
-                "date": fullData[keys[i - 1]][0].date
-            },
-            "worse": {
-                "time": keys[i + 1],
-                "user": fullData[keys[i + 1]][0].user,
-                "date": fullData[keys[i + 1]][0].date
-            }
-        };
-    }
-    res.send(JSON.stringify(ret));
-
->>>>>>> game
-});
+//above go to game routes
 
 //API functions
 app.all('/api/:id', (req, res) => {
@@ -150,6 +93,7 @@ app.all('/api/:id', (req, res) => {
 });
 
 //Check if its directory Files or doesn't exist
+/* oldcode
 app.get('*', (req, res, next) => {
     fs.readdir(httpdocs + req.url, function (err, files) {
         var fileData = [];
@@ -174,6 +118,20 @@ app.get('*', (req, res, next) => {
         }
     });
 });
+*/
+app.get('*', (req, res, next) => {
+    res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
+        if (err) {
+            res.render('error', {
+                message: req.url
+            });
+        } else {
+            res.send(html);
+        }
+    });
+});
+
+
 
 //Start up app
 exec('hostname -I', (err, stdout, stderr) => {
