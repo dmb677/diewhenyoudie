@@ -1,14 +1,51 @@
-require('dotenv').config();
-const express = require('express');
+const fs = require('fs');
+
+
+const website = 'sites/' + process.argv[2];
+if (!fs.existsSync(website + '/.env')) {
+    console.log("no website with .env found named: " + website);
+    process.exit();
+}
+require('dotenv').config({
+    path: website + '/.env'
+});
+
+
+const app = require('express')();
+
 const {
     exec
 } = require('child_process');
-const fs = require('fs');
-const app = express();
 
+
+const multer = require('multer');
+const path = require('path');
 
 const JSONdb = require('simple-json-db');
-const gamerDB = new JSONdb(process.env.gameDB);
+const imageLog = new JSONdb(process.env.imagePath + '/imageLog.json');
+
+
+//check if process.env.imagePath exists
+if (!fs.existsSync(process.env.imagePath)) {
+    fs.mkdirSync(process.env.imagePath, {
+        recursive: true
+    });
+    console.log(`Directory created at ${process.env.imagePath}`);
+} else {
+    console.log(`Directory already exists at ${process.env.imagePath}`);
+}
+
+var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, process.env.imagePath);
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+var upload = multer({
+    storage: storage
+});
 
 //create session var
 const session = require('express-session');
@@ -32,12 +69,15 @@ const sessionVar = session({
 //routes
 const authRoutes = require('./routes/auth')(process.env.userDB);
 const logRoutes = require('./routes/log')(process.env.LogIPDB, process.env.logfile, process.env.userDB);
+const gameRoutes = require('./routes/game-routes')(process.env.gameDB);
 
 
 const port = process.env.port;
-const httpdocs = __dirname + '/httpdocs/';
+const httpdocs = __dirname + '/' + website + '/httpdocs/';
+const httpdocsAny = __dirname + '/sites/any';
+const ejsDir = [__dirname + '/' + website + '/views', __dirname + '/sites/any'];
 const bashDir = __dirname + '/bash';
-const ejsDir = __dirname + '/views';
+
 
 //set view engine
 app.set('view engine', 'ejs');
@@ -46,10 +86,49 @@ app.set('views', ejsDir);
 
 app.use(sessionVar);
 app.use(logRoutes);
-app.use(express.static(httpdocs));
+app.use((require('express')).static(httpdocs));
+app.use((require('express')).static(httpdocsAny));
+app.use((require('express')).static(process.env.imagePath));
 app.use('/auth', authRoutes);
+app.use('/game', gameRoutes);
 
-<<<<<<< HEAD
+/** 
+app.get('/upload', async (request, response) => {
+    response.sendFile(__dirname + '/upload.html');
+});
+*/
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    //console.log(request.session.id)
+
+    res.json({
+        filename: req.file.filename
+    });
+
+});
+
+app.use((require('express')).json());
+app.post('/upload-log', (req, res) => {
+
+    imageLog.set(Date.now(), {
+        "session": req.session.id,
+        "caption": req.body.caption,
+        "paths": req.body.paths
+    });
+
+
+    res.json({
+        filename: "hello-you makd it"
+    });
+
+});
+
+
+app.get('/upload-log-read', (req, res) => {
+    res.send(JSON.stringify(imageLog.JSON()));
+});
+
+
 app.get('/', (req, res) => {
     res.render('index');
 });
@@ -75,67 +154,8 @@ app.get('/b/edit', (req, res) => {
     res.render('bedit', {
         blogtitle: 'Editing'
     });
-=======
-
-app.get('/game/sign/:user', (req, res) => {
-    req.session.gameUser = req.params.user;
-    res.end();
 });
 
-app.get('/game/getGameUser', (req,res) =>{
-    res.send(req.session.gameUser);
-})
-
-app.get('/game/score/:finalScore', (req, res) => {
-    const date = new Date();
-    var newScore;
-
-    if (gamerDB.has(req.params.finalScore)) {
-        newScore = (gamerDB.get(req.params.finalScore));
-    } else {
-        newScore = [];
-    }
-    newScore.push({
-        "date": date,
-        "user": req.session.gameUser
-    });
-    gamerDB.set(req.params.finalScore, newScore);
-
-    var fullData = gamerDB.JSON();
-    var keys = Object.keys(fullData);
-    for (i = 0; i < keys.length; i++) {
-        if (keys[i] == req.params.finalScore) {
-
-            break;
-        }
-    }
-
-    //need to check if there are more than one person better/worse
-    //need to check if nobody is better or worse
-
-    if (i == (keys.length - 1)) {
-        ret = {
-            "place": (keys.length - i),
-        };
-    } else {
-        var ret = {
-            "place": (keys.length - i),
-            "better": {
-                "time": keys[i - 1],
-                "user": fullData[keys[i - 1]][0].user,
-                "date": fullData[keys[i - 1]][0].date
-            },
-            "worse": {
-                "time": keys[i + 1],
-                "user": fullData[keys[i + 1]][0].user,
-                "date": fullData[keys[i + 1]][0].date
-            }
-        };
-    }
-    res.send(JSON.stringify(ret));
-
->>>>>>> game
-});
 
 //API functions
 app.all('/api/:id', (req, res) => {
@@ -149,31 +169,22 @@ app.all('/api/:id', (req, res) => {
     });
 });
 
-//Check if its directory Files or doesn't exist
 app.get('*', (req, res, next) => {
-    fs.readdir(httpdocs + req.url, function (err, files) {
-        var fileData = [];
+    res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
         if (err) {
-            req.hasError = true;
+           
+            console.log(err.message);
+           
             res.render('error', {
                 message: req.url
             });
         } else {
-            files.forEach(file => {
-                fileData.push({
-                    fileName: file,
-                    filePath: `${req.url}${file}`,
-                    fileType: fs.lstatSync(`${httpdocs}${req.url}${file}`)
-                        .isDirectory() ? 'dir' : 'file'
-                });
-            });
-            res.render('viewDirectory', {
-                data: fileData
-            });
-            //do we need next() here?
+            res.send(html);
         }
     });
 });
+
+
 
 //Start up app
 exec('hostname -I', (err, stdout, stderr) => {

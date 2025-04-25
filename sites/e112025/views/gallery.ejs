@@ -1,0 +1,40 @@
+<style>
+    .gallery-image {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        margin: 5px;  
+        height: 220px;
+    }
+</style>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head.ejs',{title:'Gallery'}) %>
+
+<body>
+    <%- include('partials/navbar.ejs') %>
+    <template id="my-template">
+        <div class="user-card border-bottom border-secondary">
+            <h3 class="pt-5"></h3>
+            <span></span>
+        </div>
+    </template>
+
+    <div class="container">
+        <h1 class="mt-5 pt-5">Directory Contents</h1>
+        <div id="container"></div>
+    </div>
+
+    <%- include('partials/footer.ejs') %>
+</body>
+
+</html>
+
+
+
+<script>
+    populateImages(document.getElementById('my-template'), document.getElementById('container'));
+</script>

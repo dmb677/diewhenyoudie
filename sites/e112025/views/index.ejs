@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+
+<%- include('partials/head.ejs',{title:'Home'}) %>
+
+<body>
+    <%- include('partials/navbar.ejs') %>
+    <div class="container">
+        <h1 class="text-center mb-5 mt-5"><b>Upload Your Images</b></h1>
+
+        <label class="form-label" for="customFile">Select Images to Upload</label>
+
+        <input type="file" class="form-control" id="customFile" multiple />
+
+        <button onclick="uploadFileButton()">Upload</button>
+
+        <br>
+
+        <div id="drop_zone">
+            <p>...or drag and drop files here</p>
+        </div>
+        <br />
+        <div class="card mb-5">
+            <div class="card-header">
+                <div class="row">
+                    <div class="col col-6">Uploaded File</div>
+                    <div class="col col-6"></div>
+                </div>
+            </div>
+            <div class="container my-2">
+                <div class="row" id="uploadedImage">
+
+                </div>
+                <button class="btn btn-primary d-none" type="submit" id="submitImages">Submit Images</button>
+                <input type="text" class="form-control d-none" aria-label="Small"
+                    aria-describedby="inputGroup-sizing-sm" placeholder="Add caption" id="caption">
+            </div>
+        </div>
+    </div>
+
+</body>
+
+</html>
+
+<style>
+
+</style>
+
+<script>
+    var dropZone = document.getElementById('drop_zone');
+
+    dropZone.addEventListener('dragover', (event) => {
+        event.preventDefault();
+        dropZone.classList.add('hover');
+    });
+
+    dropZone.addEventListener('dragleave', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('hover');
+    });
+
+    dropZone.addEventListener('drop', (event) => {
+        event.preventDefault();
+        dropZone.classList.remove('hover');
+        var files = event.dataTransfer.files;
+        handlesFiles(files);
+    });
+
+    var submitButton = document.getElementById('submitImages');
+    submitButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        var images = document.getElementsByClassName('img-thumbnail')
+        var imageFileArray = [];
+        for (let i of images) {
+            imageFileArray.push(i.getAttribute("src"))
+        }
+        console.log(imageFileArray)
+        fetch('/upload-log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    "paths": imageFileArray,
+                    "caption": document.getElementById('caption').value,
+
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                console.log("just pushed");
+                const gallery = document.getElementById('uploadedImage');
+                gallery.innerHTML = 'Just Pushed'
+                document.getElementById('submitImages').classList.add('d-none')
+                document.getElementById('caption').classList.add('d-none')
+
+            })
+            .catch(error => console.error('Error:', error));
+    });
+
+    function handlesFiles(files) {
+        console.log(files)
+        for (var count = 0; count < files.length; count++) {
+            var file = files[count];
+            uploadFile(file);
+        }
+    }
+
+    function uploadFile(file) {
+        var formData = new FormData();
+        formData.append('file', file);
+        fetch('/upload', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => response.json())
+            .then(data => {
+                const gallery = document.getElementById('uploadedImage');
+                let html =
+                    `<div class="col"><button type="button" class="btn-close" aria-label="Close"></button><img class="img-thumbnail" src="/${data.filename}"/></div>`;
+                gallery.innerHTML = gallery.innerHTML + html;
+                var btn = document.getElementsByClassName('btn-close')
+                for (let i of btn) {
+                    i.addEventListener('click', (e) => {
+                        e.target.parentElement.remove();
+                    });
+                }
+                document.getElementById('submitImages').classList.remove('d-none')
+                document.getElementById('caption').classList.remove('d-none')
+
+            });
+    }
+
+    function uploadFileButton() {
+        const fileInput = document.getElementById('customFile');
+        //if no files are selected
+        handlesFiles(fileInput.files)
+
+    }
+</script>
+
+
+
+<style>
+    .img-thumbnail {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        width: 150px;
+    }
+
+    #drop_zone {
+        width: 100%;
+        min-height: 200px;
+        border: 2px dashed #ccc;
+        border-radius: 10px;
+        padding: 20px;
+        box-sizing: border-box;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        flex-direction: column;
+    }
+
+    #drop_zone.hover {
+        background-color: #f0f0f0;
+    }
+</style>
