@@ -75,11 +75,6 @@ app.get('/b/edit', (req, res) => {
 });
 
 
-//need to put in game routese
-
-
-//above go to game routes
-
 //API functions
 app.all('/api/:id', (req, res) => {
     exec(`${bashDir}/${req.params.id}.sh`, (err, stdout, stderr) => {
@@ -92,33 +87,6 @@ app.all('/api/:id', (req, res) => {
     });
 });
 
-//Check if its directory Files or doesn't exist
-/* oldcode
-app.get('*', (req, res, next) => {
-    fs.readdir(httpdocs + req.url, function (err, files) {
-        var fileData = [];
-        if (err) {
-            req.hasError = true;
-            res.render('error', {
-                message: req.url
-            });
-        } else {
-            files.forEach(file => {
-                fileData.push({
-                    fileName: file,
-                    filePath: `${req.url}${file}`,
-                    fileType: fs.lstatSync(`${httpdocs}${req.url}${file}`)
-                        .isDirectory() ? 'dir' : 'file'
-                });
-            });
-            res.render('viewDirectory', {
-                data: fileData
-            });
-            //do we need next() here?
-        }
-    });
-});
-*/
 app.get('*', (req, res, next) => {
     res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
         if (err) {
