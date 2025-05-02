@@ -5,6 +5,33 @@ const {
 } = require('child_process');
 const fs = require('fs');
 const app = express();
+const multer = require('multer');
+const path = require('path');
+
+const JSONdb = require('simple-json-db');
+const imageLog = new JSONdb(process.env.imagePath + '/imageLog.json');
+
+//check if process.env.imagePath exists
+if (!fs.existsSync(process.env.imagePath)) {
+    fs.mkdirSync(process.env.imagePath, {
+        recursive: true
+    });
+    console.log(`Directory created at ${process.env.imagePath}`);
+} else {
+    console.log(`Directory already exists at ${process.env.imagePath}`);
+}
+
+var storage = multer.diskStorage({
+    destination: function (req, file, callback) {
+        callback(null, process.env.imagePath);
+    },
+    filename: function (req, file, callback) {
+        callback(null, file.fieldname + '-' + Date.now() + path.extname(file.originalname));
+    }
+});
+var upload = multer({
+    storage: storage
+});
 
 //create session var
 const session = require('express-session');
@@ -44,8 +71,46 @@ app.set('views', ejsDir);
 app.use(sessionVar);
 app.use(logRoutes);
 app.use(express.static(httpdocs));
+app.use(express.static(process.env.imagePath));
 app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
+
+/** 
+app.get('/upload', async (request, response) => {
+    response.sendFile(__dirname + '/upload.html');
+});
+*/
+
+app.post('/upload', upload.single('file'), (req, res) => {
+    //console.log(request.session.id)
+
+    res.json({
+        filename: req.file.filename
+    });
+
+});
+
+app.use(express.json());
+app.post('/upload-log', (req, res) => {
+
+    imageLog.set(Date.now(), {
+        "session": req.session.id,
+        "caption": req.body.caption,
+        "paths": req.body.paths
+    });
+
+
+    res.json({
+        filename: "hello-you makd it"
+    });
+
+});
+
+
+app.get('/upload-log-read', (req, res) => {
+    res.send(JSON.stringify(imageLog.JSON()));
+});
+
 
 app.get('/', (req, res) => {
     res.render('index');
@@ -90,6 +155,7 @@ app.all('/api/:id', (req, res) => {
 app.get('*', (req, res, next) => {
     res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
         if (err) {
+            console.log(err);
             res.render('error', {
                 message: req.url
             });
