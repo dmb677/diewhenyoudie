@@ -11,6 +11,8 @@ const path = require('path');
 const JSONdb = require('simple-json-db');
 const imageLog = new JSONdb(process.env.imagePath + '/imageLog.json');
 
+console.log(process.argv[2]);
+
 //check if process.env.imagePath exists
 if (!fs.existsSync(process.env.imagePath)) {
     fs.mkdirSync(process.env.imagePath, {

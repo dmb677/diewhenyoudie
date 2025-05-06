@@ -3,7 +3,8 @@
         border: 1px solid #ddd;
         border-radius: 4px;
         padding: 5px;
-        width: 150px;
+        margin: 5px;  
+        height: 220px;
     }
 </style>
 
@@ -11,44 +12,29 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
 
-<%- include('partials/head.ejs',{title:'Gallery'}) %>
+<%- include('partials/e112025/head.ejs',{title:'Gallery'}) %>
 
 <body>
-
-    <h1>Directory Contents</h1>
+    <%- include('partials/e112025/navbar.ejs') %>
     <template id="my-template">
-        <div class="user-card">
-            <h3></h3>
+        <div class="user-card border-bottom border-secondary">
+            <h3 class="pt-5"></h3>
             <span></span>
         </div>
     </template>
 
-    <div id="container"></div>
+    <div class="container">
+        <h1 class="mt-5 pt-5">Directory Contents</h1>
+        <div id="container"></div>
+    </div>
+
+    <%- include('partials/e112025/footer.ejs') %>
 </body>
+
+</html>
 
 
 
 <script>
-    var data;
-    const template = document.getElementById('my-template');
-    const container = document.getElementById('container');
-    fetch('/upload-log-read')
-        .then(res => res.json())
-        .then(d => {
-            for (const key in d) {
-                const clone = template.content.cloneNode(true);
-                clone.querySelector('h3').textContent = d[key].caption;
-
-                d[key].paths.forEach(element => {
-                    const img = document.createElement('img');
-                    img.src = element;
-                    img.classList.add('gallery-image')
-                    clone.querySelector('span').appendChild(img);
-                })
-
-
-                container.appendChild(clone);
-            }
-
-        })
+    populateImages(document.getElementById('my-template'), document.getElementById('container'));
 </script>
