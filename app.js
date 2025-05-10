@@ -1,17 +1,29 @@
-require('dotenv').config();
-const express = require('express');
+const fs = require('fs');
+
+
+const website = 'sites/' + process.argv[2];
+if (!fs.existsSync(website + '/.env')) {
+    console.log("no website with .env found named: " + website);
+    process.exit();
+}
+require('dotenv').config({
+    path: website + '/.env'
+});
+
+
+const app = require('express')();
+
 const {
     exec
 } = require('child_process');
-const fs = require('fs');
-const app = express();
+
+
 const multer = require('multer');
 const path = require('path');
 
 const JSONdb = require('simple-json-db');
 const imageLog = new JSONdb(process.env.imagePath + '/imageLog.json');
 
-console.log(process.argv[2]);
 
 //check if process.env.imagePath exists
 if (!fs.existsSync(process.env.imagePath)) {
@@ -61,9 +73,11 @@ const gameRoutes = require('./routes/game-routes')(process.env.gameDB);
 
 
 const port = process.env.port;
-const httpdocs = __dirname + '/httpdocs/';
+const httpdocs = __dirname + '/' + website + '/httpdocs/';
+const httpdocsAny = __dirname + '/sites/any';
+const ejsDir = [__dirname + '/' + website + '/views', __dirname + '/sites/any'];
 const bashDir = __dirname + '/bash';
-const ejsDir = __dirname + '/views';
+
 
 //set view engine
 app.set('view engine', 'ejs');
@@ -72,8 +86,9 @@ app.set('views', ejsDir);
 
 app.use(sessionVar);
 app.use(logRoutes);
-app.use(express.static(httpdocs));
-app.use(express.static(process.env.imagePath));
+app.use((require('express')).static(httpdocs));
+app.use((require('express')).static(httpdocsAny));
+app.use((require('express')).static(process.env.imagePath));
 app.use('/auth', authRoutes);
 app.use('/game', gameRoutes);
 
@@ -92,7 +107,7 @@ app.post('/upload', upload.single('file'), (req, res) => {
 
 });
 
-app.use(express.json());
+app.use((require('express')).json());
 app.post('/upload-log', (req, res) => {
 
     imageLog.set(Date.now(), {
@@ -157,7 +172,9 @@ app.all('/api/:id', (req, res) => {
 app.get('*', (req, res, next) => {
     res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
         if (err) {
-            console.log(err);
+           
+            console.log(err.message);
+           
             res.render('error', {
                 message: req.url
             });
