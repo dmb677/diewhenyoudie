@@ -1,4 +1,4 @@
-module.exports = function (IPPath, logFilePath, userDBpath) {
+module.exports = function (IPPath, logFilePath, userDBpath, debugDump) {
     const express = require('express');
     const router = express.Router();
     const {
@@ -102,6 +102,9 @@ module.exports = function (IPPath, logFilePath, userDBpath) {
                     console.log(err);
                 }
             });
+            if (debugDump) {
+                console.log(logData);
+            }
             writeIPFile(req.simpleIP);
         });
         next();
@@ -112,6 +115,29 @@ module.exports = function (IPPath, logFilePath, userDBpath) {
             fs.readFile(logFile, 'utf8', (err, d) => {
                 res.setHeader('content-type', 'text/plain');
                 res.send(d);
+            });
+        } else {
+            res.send("You need to be logged in as admin to see this page");
+        }
+    });
+
+
+    router.get('/log/failedURLs', (req, res, next) => {
+        if (req.session.user && req.session.admin) {
+            fs.readFile(logFile, 'utf8', (err, d) => {
+                if (d == null) {
+                    res.send("no log exists");
+                } else {
+                    var output = "";
+                    var data = JSON.parse('[' + d.substring(0, d.length - 1) + ']'); //parse data
+                    for (var element in data) {
+                        if (data[element].err === 'URL Not Found\n') {
+                            output += data[element].URL + ' by: ' + data[element].IP + '\n';
+                        }
+                    }
+                    res.setHeader('content-type', 'text/plain');
+                    res.send(output);
+                }
             });
         } else {
             res.send("You need to be logged in as admin to see this page");

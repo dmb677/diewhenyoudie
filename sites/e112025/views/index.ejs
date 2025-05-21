@@ -1,168 +1,156 @@
-<!doctype html>
+<style>
+    .gallery-image {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        margin: 5px;
+        height: 220px;
+    }
+
+    .back-image {
+        background: rgba(5, 5, 5, 0.5);
+
+    }
+
+    #top {
+        background-image: url('dist/bm.jpg');
+        background-size: 100%;
+        background-size: cover;
+        background-position: center;
+
+
+    }
+</style>
+
+
+<!DOCTYPE html>
 <html lang="en">
 
-<%- include('partials/head.ejs',{title:'Home'}) %>
+<%- include('partials/head.ejs',{title:'E-11 Culture'}) %>
 
 <body>
     <%- include('partials/navbar.ejs') %>
-    <div class="container">
-        <h1 class="text-center mb-5 mt-5"><b>Upload Your Images</b></h1>
-
-        <label class="form-label" for="customFile">Select Images to Upload</label>
-
-        <input type="file" class="form-control" id="customFile" multiple />
-
-        <button onclick="uploadFileButton()">Upload</button>
-
-        <br>
-
-        <div id="drop_zone">
-            <p>...or drag and drop files here</p>
-        </div>
-        <br />
-        <div class="card mb-5">
-            <div class="card-header">
+    <template id="my-template">
+        <div class="user-card border-bottom border-secondary py-3">
+            <div class="container">
                 <div class="row">
-                    <div class="col col-6">Uploaded File</div>
-                    <div class="col col-6"></div>
+                    <h3 class="pt-5 text-capitalize"></h3>
+                    <span></span>
                 </div>
-            </div>
-            <div class="container my-2">
-                <div class="row" id="uploadedImage">
-
+                <div class="row">
+                    <button type="button" class="btn btn-primary">Remove Content</button>
                 </div>
-                <button class="btn btn-primary d-none" type="submit" id="submitImages">Submit Images</button>
-                <input type="text" class="form-control d-none" aria-label="Small"
-                    aria-describedby="inputGroup-sizing-sm" placeholder="Add caption" id="caption">
             </div>
         </div>
-    </div>
 
+    </template>
+
+
+    <section id="top" class="pt-5">
+        <div class="back-image py-5">
+            <div class="container">
+                <h1 class="mt-2 py-5 text-light"><span class="fw-bold">EVOLVE</span><span
+                        class="fw-light">.culture</span>
+                </h1>
+                <p class="text-light">
+                    <span class="fs-4 fw-medium">G</span>enerations of humans have lived in community, have lived
+                    connected
+                    to
+                    the land, connected to environment,
+                    connected to a shared identity and shared history. <span class="fw-medium">Their life was always
+                        about
+                        something bigger.</span> Rituals,
+                    ceremonies, and belief systems that placed their existence in the context of the universe. Life was
+                    meaningful.
+                </p>
+                <p class="text-light">
+                    <span class="fs-4 fw-medium">T</span>oday, all that's been dissolved. Science has dissolved the myth
+                    of
+                    religion and superstition. Everything
+                    has been reduced to mere materialism. Capitalist individualism has destroyed our sense of community,
+                    our
+                    sense of being has been commodified, our art and culture is just something to be marketed and sold
+                    to
+                    the
+                    highest bidder. Everything that once brought us together has evaporated. "All that was solid, melted
+                    into
+                    air", Now we stand alone as individuals to be judged by the marketplace. That final God left
+                    standing to
+                    rule over us.
+                </p>
+                <p class="text-light">
+                    <span class="fs-5 fw-medium">Alone our lives are meaningless and short.</span>
+                </p>
+                <p class="text-light">
+
+                    <span class="fs-6 fw-medium">W</span>e are the children that have inherited nothing. We can only
+                    strive
+                    to
+                    be found productive enough so that
+                    the Economy rewards us with a McMansion and a 401K.
+                </p>
+                <p class="text-light">
+                    <span class="fs-6 fw-medium">H</span>ere at E11, we try to boldly and defiantly create a new
+                    culture, a
+                    new
+                    way of being, not one that
+                    romanticizes the
+                    past. But one that forges a new community, a new way of being, a new type of living for something
+                    bigger
+                    than us, a new culture. We live for art and the creative process. We live for community and dance.
+                    We
+                    are
+                    valuable not because we can create value in the economy, but because we can feel interconnected and
+                    part
+                    of
+                    the web, and contribute to its culture.
+
+                </p>
+                <p class="text-light">
+                    <span class="fs-6 fw-medium">N</span>ew rituals and ceremonies bind us together and create meaning
+                    out of
+                    the chaos and empitness of solitary
+                    existence.
+                </p>
+
+
+            </div>
+        </div>
+    </section>
+
+
+
+    <section id="Image-start" class="pt-5">
+        <div class="container">
+            <h1 class="mt-2 py-5"><span class="fw-bold">IMAGINE</span><span class="fw-light">.culture</span>
+            </h1>
+
+            <div id="addImages"></div>
+        </div>
+    </section>
+
+
+
+
+
+
+
+    <%- include('partials/footer.ejs') %>
 </body>
 
 </html>
 
-<style>
 
-</style>
 
 <script>
-    var dropZone = document.getElementById('drop_zone');
+   
 
-    dropZone.addEventListener('dragover', (event) => {
-        event.preventDefault();
-        dropZone.classList.add('hover');
-    });
+    
+    fetch('/auth/isLoggedin')
+        .then(res => res.json())
+        .then(d => {
+             populateImages(document.getElementById('my-template'), document.getElementById('addImages'), d);
+        });
 
-    dropZone.addEventListener('dragleave', (event) => {
-        event.preventDefault();
-        dropZone.classList.remove('hover');
-    });
-
-    dropZone.addEventListener('drop', (event) => {
-        event.preventDefault();
-        dropZone.classList.remove('hover');
-        var files = event.dataTransfer.files;
-        handlesFiles(files);
-    });
-
-    var submitButton = document.getElementById('submitImages');
-    submitButton.addEventListener('click', (event) => {
-        event.preventDefault();
-        var images = document.getElementsByClassName('img-thumbnail')
-        var imageFileArray = [];
-        for (let i of images) {
-            imageFileArray.push(i.getAttribute("src"))
-        }
-        console.log(imageFileArray)
-        fetch('/upload-log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({
-                    "paths": imageFileArray,
-                    "caption": document.getElementById('caption').value,
-
-                })
-            })
-            .then(response => response.json())
-            .then(data => {
-                console.log("just pushed");
-                const gallery = document.getElementById('uploadedImage');
-                gallery.innerHTML = 'Just Pushed'
-                document.getElementById('submitImages').classList.add('d-none')
-                document.getElementById('caption').classList.add('d-none')
-
-            })
-            .catch(error => console.error('Error:', error));
-    });
-
-    function handlesFiles(files) {
-        console.log(files)
-        for (var count = 0; count < files.length; count++) {
-            var file = files[count];
-            uploadFile(file);
-        }
-    }
-
-    function uploadFile(file) {
-        var formData = new FormData();
-        formData.append('file', file);
-        fetch('/upload', {
-                method: 'POST',
-                body: formData
-            })
-            .then(response => response.json())
-            .then(data => {
-                const gallery = document.getElementById('uploadedImage');
-                let html =
-                    `<div class="col"><button type="button" class="btn-close" aria-label="Close"></button><img class="img-thumbnail" src="/${data.filename}"/></div>`;
-                gallery.innerHTML = gallery.innerHTML + html;
-                var btn = document.getElementsByClassName('btn-close')
-                for (let i of btn) {
-                    i.addEventListener('click', (e) => {
-                        e.target.parentElement.remove();
-                    });
-                }
-                document.getElementById('submitImages').classList.remove('d-none')
-                document.getElementById('caption').classList.remove('d-none')
-
-            });
-    }
-
-    function uploadFileButton() {
-        const fileInput = document.getElementById('customFile');
-        //if no files are selected
-        handlesFiles(fileInput.files)
-
-    }
+    
 </script>
-
-
-
-<style>
-    .img-thumbnail {
-        border: 1px solid #ddd;
-        border-radius: 4px;
-        padding: 5px;
-        width: 150px;
-    }
-
-    #drop_zone {
-        width: 100%;
-        min-height: 200px;
-        border: 2px dashed #ccc;
-        border-radius: 10px;
-        padding: 20px;
-        box-sizing: border-box;
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        flex-direction: column;
-    }
-
-    #drop_zone.hover {
-        background-color: #f0f0f0;
-    }
-</style>

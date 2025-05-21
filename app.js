@@ -1,3 +1,7 @@
+//Setup
+const {
+    debug
+} = require('console');
 const fs = require('fs');
 
 
@@ -9,7 +13,7 @@ if (!fs.existsSync(website + '/.env')) {
 require('dotenv').config({
     path: website + '/.env'
 });
-
+var debugDump = (process.argv[3] === 'debug');
 
 const app = require('express')();
 
@@ -68,7 +72,7 @@ const sessionVar = session({
 
 //routes
 const authRoutes = require('./routes/auth')(process.env.userDB);
-const logRoutes = require('./routes/log')(process.env.LogIPDB, process.env.logfile, process.env.userDB);
+const logRoutes = require('./routes/log')(process.env.LogIPDB, process.env.logfile, process.env.userDB, debugDump);
 const gameRoutes = require('./routes/game-routes')(process.env.gameDB);
 
 
@@ -128,6 +132,11 @@ app.get('/upload-log-read', (req, res) => {
     res.send(JSON.stringify(imageLog.JSON()));
 });
 
+app.post('/upload-log-delete/:del', (req, res) => {
+    imageLog.delete(req.params.del);
+    res.end();
+});
+
 
 app.get('/', (req, res) => {
     res.render('index');
@@ -169,15 +178,16 @@ app.all('/api/:id', (req, res) => {
     });
 });
 
-app.get('*', (req, res, next) => {
-    res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
+app.get('*', (req, res) => {
+    var theURL = req.url.replace(/^\//, '').replace(/\.+/g, '');
+    res.render(theURL, {}, (err, html) => {
         if (err) {
-           
-            console.log(err.message);
-           
+            req.hasError = true;
+
             res.render('error', {
                 message: req.url
             });
+            res.end();
         } else {
             res.send(html);
         }

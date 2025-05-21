@@ -1,8 +1,47 @@
+    <style>
+        .nav-image {
+            height: 35px;
+        }
+
+
+        .checkmark {
+            display: none;
+            width: 22px;
+            height: 22px;
+            -ms-transform: rotate(45deg);
+            /* IE 9 */
+            -webkit-transform: rotate(45deg);
+            /* Chrome, Safari, Opera */
+            transform: rotate(45deg);
+        }
+
+        .checkmark_stem {
+            position: absolute;
+            width: 3px;
+            height: 9px;
+            background-color: #e2e1e1;
+            left: 11px;
+            top: 6px;
+        }
+
+        .checkmark_kick {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background-color: #e2e1e1;
+            left: 8px;
+            top: 12px;
+        }
+
+
+    </style>
+
+
     <!-- Navbar -->
-    <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
         <div class="container">
             <!-- Brand/logo -->
-            <a class="navbar-brand" href="#">CREATE.culture</a>
+            <a class="navbar-brand" href="/"><img class="nav-image mb-2" src="/favicon.ico" />E11.culture</a>
 
             <!-- Toggle button for mobile -->
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown"
@@ -15,70 +54,41 @@
                 <ul class="navbar-nav">
                     <!-- Regular nav item -->
                     <li class="nav-item">
-                        <a class="nav-link active" aria-current="page" href="/">Upload Images</a>
+                        <a class="nav-link active" aria-current="page" href="/upload">Upload</a>
                     </li>
 
-                    <!-- Dropdown menu -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="servicesDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Services
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="servicesDropdown">
-                            <li><a class="dropdown-item" href="#">Web Design</a></li>
-                            <li><a class="dropdown-item" href="#">Development</a></li>
-                            <li><a class="dropdown-item" href="#">SEO</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="#">Consultation</a></li>
-                        </ul>
-                    </li>
-
-                    <!-- Another dropdown -->
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="productsDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Products
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="productsDropdown">
-                            <li><a class="dropdown-item" href="#">Software</a></li>
-                            <li><a class="dropdown-item" href="#">Apps</a></li>
-                            <li><a class="dropdown-item" href="#">Templates</a></li>
-                        </ul>
-                    </li>
 
                     <!-- Regular nav item -->
                     <li class="nav-item">
-                        <a class="nav-link" href="#">About</a>
+                        <a class="nav-link" href="/about">About</a>
                     </li>
 
                     <!-- Regular nav item -->
+
                     <li class="nav-item">
-                        <a class="nav-link" href="#">Contact</a>
+                        <a class="nav-link" href="/#Image-start">Images</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link" href="/contact">Contact</a>
                     </li>
                 </ul>
 
                 <!-- Right-aligned items -->
                 <ul class="navbar-nav ms-auto">
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            <i class="bi bi-person-fill"></i> Account
-                        </a>
-                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
-                            <li><a class="dropdown-item" href="#">Profile</a></li>
-                            <li><a class="dropdown-item" href="#">Settings</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="#">Logout</a></li>
-                        </ul>
+                    <a class="nav-link" href="/auth/login" role="button" data-bs-toggle="dropdown"
+                        aria-expanded="false">
+                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link" href="/auth/login">
+                            <span class="checkmark" id="loggedin-checkmark">
+                                <div class="checkmark_stem"></div>
+                                <div class="checkmark_kick"></div>
+                            </span>
+                            Account</a>
                     </li>
+
                 </ul>
             </div>
         </div>
     </nav>
-
-
-  
