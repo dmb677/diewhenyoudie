@@ -1,0 +1,47 @@
+<style>
+    .gallery-image {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        margin: 5px;
+        height: 220px;
+    }
+</style>
+
+
+<!DOCTYPE html>
+<html lang="en">
+
+<%- include('partials/head.ejs',{title:'Gallery'}) %>
+
+<body>
+    <%- include('partials/navbar.ejs') %>
+    <section class="pt-5">
+
+
+        <div class="container">
+            <h1 class="mt-2 py-5"><span class="fw-bold">CREATE</span><span class="fw-light">.culture</span></h1>
+            <p>
+                Add Instructions Here
+            </p>
+
+            <div class="text-center"><img src="dist/divider.png"></div>
+
+
+            <div id="addImages"></div>
+
+        </div>
+    </section>
+
+
+
+    <%- include('partials/footer.ejs') %>
+</body>
+
+</html>
+
+
+
+<script>
+    populateImages(document.getElementById('my-template'), document.getElementById('addImages'));
+</script>

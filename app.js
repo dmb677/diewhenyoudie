@@ -169,15 +169,16 @@ app.all('/api/:id', (req, res) => {
     });
 });
 
-app.get('*', (req, res, next) => {
-    res.render(req.url.replace(/^\//, ''), {}, (err, html) => {
+app.get('*', (req, res) => {
+    var theURL = req.url.replace(/^\//, '').replace(/\.+/g, '');
+    res.render(theURL, {}, (err, html) => {
         if (err) {
-           
-            console.log(err.message);
-           
+            req.hasError = true; 
+
             res.render('error', {
                 message: req.url
             });
+            res.end();
         } else {
             res.send(html);
         }
