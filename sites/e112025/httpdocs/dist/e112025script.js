@@ -18,3 +18,4 @@ function populateImages(template, container) {
             }
         });
 }
+
