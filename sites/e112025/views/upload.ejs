@@ -18,7 +18,7 @@
 
                 <label class="form-label" for="customFile">Select Images to Upload</label>
 
-                <input type="file" class="form-control" id="customFile" multiple />
+                <input type="file" class="form-control" id="customFile" oninput="uploadFileButton()" multiple />
 
                 <button class="my-3" onclick="uploadFileButton()">Upload</button>
 
@@ -64,7 +64,6 @@
 
 
     function handlesFiles(files) {
-        console.log(files)
         for (var count = 0; count < files.length; count++) {
             var file = files[count];
             uploadFile(file);
@@ -155,7 +154,6 @@
                 .then(response => response.json())
                 .then(data => {
                     console.log("complete");
-
                     bootstrap.Alert.getOrCreateInstance(document.getElementById('myAlert')).close();
 
                 })
