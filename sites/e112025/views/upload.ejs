@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en">
 
-<%- include('partials/head.ejs',{title:'Home'}) %>
+<%- include('partials/head.ejs',{title:'Upload'}) %>
 
 <body>
     <%- include('partials/navbar.ejs') %>
@@ -18,10 +18,9 @@
 
                 <label class="form-label" for="customFile">Select Images to Upload</label>
 
-                <input type="file" class="form-control" id="customFile" oninput="uploadFileButton()" multiple />
+                <input type="file" class="form-control" id="customFile" accept="image/*" multiple />
 
-                <button class="my-3" onclick="uploadFileButton()">Upload</button>
-
+             
                 <br>
 
                 <div id="drop_zone">
@@ -71,7 +70,25 @@
     }
 
     function uploadFile(file) {
-        var formData = new FormData();
+        const id = Date.now();
+
+        let html = [
+            `<div class="img-thumbnail-spinner text-center col-sm-3" id="${id}">`,
+            `<div class="spinner-grow text-primary" role="status">`,
+            `<span class="visually-hidden">Loading...</span>`,
+            `</div></div>`
+        ].join('');
+
+
+        console.log("html");
+
+        if (document.getElementById('alertMessageText')) {
+            document.getElementById('alertMessageText').innerHTML += html;
+        } else {
+            appendAlert(html, 'light')
+        }
+
+        var formData = new FormData(); //remember to increase NGINX size
         formData.append('file', file);
         fetch('/upload', {
                 method: 'POST',
@@ -79,17 +96,9 @@
             })
             .then(response => response.json())
             .then(data => {
-                if (document.getElementById('alertMessageText')) {
-                    document.getElementById('alertMessageText').innerHTML +=
-                        `<img class="img-thumbnail" src="/${data.filename}"/>`;
-                } else {
-                    let html = `<img class="img-thumbnail" src="/${data.filename}"/>`;
-                    appendAlert(html, 'light')
-                }
-
-                //document.getElementById('submitImages').classList.remove('d-none')
-                //document.getElementById('caption').classList.remove('d-none')
-
+                document.getElementById(id).remove();
+                document.getElementById('alertMessageText').innerHTML +=
+                    `<img class="img-thumbnail" src="/${data.filename}"/>`
 
             });
     }
@@ -101,11 +110,15 @@
 
     }
 
-    document.getElementById('customFile').addEventListener('change', function(e) {
+    document.getElementById('customFile').addEventListener('input', function(e) {
         if (e.target.files[0]) {
             uploadFileButton()
+            console.log("here")
+
         }
     });
+
+
 
 
 
@@ -114,7 +127,7 @@
         const wrapper = document.createElement('div')
         wrapper.innerHTML = [
             `<div class="alert alert-${type} alert-dismissible" role="alert" id="myAlert">`,
-            `   <div id="alertMessageText">${message}</div>`,
+            `   <div id="alertMessageText"class="container">${message}</div>`,
             '   <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>',
 
             '   <input type="text" class="form-control my-3" aria-label="Small"',
@@ -155,6 +168,8 @@
                 .then(data => {
                     console.log("complete");
                     bootstrap.Alert.getOrCreateInstance(document.getElementById('myAlert')).close();
+                    window.location.href = "/Thankyou"
+                    
 
                 })
                 .catch(error => console.error('Error:', error));
@@ -168,6 +183,13 @@
 
 <style>
     .img-thumbnail {
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        padding: 5px;
+        width: 150px;
+    }
+
+    .img-thumbnail-spinner {
         border: 1px solid #ddd;
         border-radius: 4px;
         padding: 5px;
