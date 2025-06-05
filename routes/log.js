@@ -1,4 +1,4 @@
-module.exports = function (IPPath, logFilePath, userDBpath) {
+module.exports = function (IPPath, logFilePath, userDBpath, debugDump) {
     const express = require('express');
     const router = express.Router();
     const {
@@ -102,6 +102,9 @@ module.exports = function (IPPath, logFilePath, userDBpath) {
                     console.log(err);
                 }
             });
+            if (debugDump) {
+                console.log(logData);
+            }
             writeIPFile(req.simpleIP);
         });
         next();
